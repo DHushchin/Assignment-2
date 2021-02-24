@@ -7,11 +7,10 @@ print(*files)
 table = []
 for file in files:
     file_path = dir_path + '\\' + file
-    f = open(file_path)
-    data = f.readlines()
-    print(data)
-    for i in range(len(data)):
-        if i != 0:
-            table += data[i]
-    f.close()
+    with open(file_path) as file_handler:
+        for line in file_handler:
+            if line[0].isalpha():
+                table.append(line)
+    table.append('\n')
 print(*table)
+input()
