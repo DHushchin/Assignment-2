@@ -1,5 +1,6 @@
 from os import listdir
 from os.path import isfile, join
+import csv
 
 def get_points(country, position, res):
     if position == 0:
@@ -39,6 +40,20 @@ for res_line in result:
     del res_line[1:len(res_line)]
     res_line.append(str(points))
 
-for line in result:
-    print(line)
+rating = []
+for _ in range(10):
+    max_votes, ind = 0, 0
+    for i in range(len(result)):
+        if int(result[i][1]) > max_votes:
+            max_votes = int(result[i][1])
+            ind = i
+    rating.append(result[ind])
+    del result[ind]
+
+
+with open(dir_path + "\\result.csv", "w", newline='') as file:
+    for pos in rating:
+        csv.writer(file).writerow(pos)
+    print("READY!")
+
 input()
