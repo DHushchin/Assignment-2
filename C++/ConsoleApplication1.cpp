@@ -28,8 +28,11 @@ vector<string> get_files() {
 	if (dir[dir.size() - 1] != '\\') dir += '\\';
 	intptr_t handle = _findfirst((dir + "*.csv").c_str(), &source);
 	do {
-		if (source.name != "results.csv") files.push_back(dir + source.name);
-		cout << dir + source.name << endl;
+		string name = source.name;
+		if (name != "results.csv") {
+			files.push_back(dir + source.name);
+			cout << dir + source.name << endl;
+		}
 	} while (_findnext(handle, &source) == 0);
 	_findclose(handle);
 	return files;
