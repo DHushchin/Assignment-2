@@ -8,13 +8,14 @@
 using namespace std;
 
 vector<string> get_files();
-vector<string> get_data(vector<string>);
+vector<pair<string, vector<int>>> get_data(vector<string>, int&);
 
 int main() {
 	vector<pair<string, vector<int>>> data;
 	setlocale(LC_ALL, " ");
+	int numberOfCountries = 0;
 	vector<string> files = get_files();
-	vector<string> data = get_data(files);
+	data = get_data(files, numberOfCountries);
 	system("pause>>void");
 	return 0;
 }
@@ -34,18 +35,41 @@ vector<string> get_files() {
 	return files;
 }
 
-vector<string> get_data(vector<string> files){
-	vector<string> countries;
+vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCountries){
+	vector<pair<string, vector<int>>> countries;
 	string str;
+	string currNumber;
+	pair<string, vector<int>> pair;
 	for (size_t i = 0; i < files.size(); i++)
 	{
 		ifstream currFile(files[i]);
 		while (!currFile.eof()) {
 			getline(currFile, str);
+			vector<int> numbers;
+			string country;
 			if (!isdigit(str[0])) {
-				countries.push_back(str);
+				country = str.substr(0, str.find(','));
+				str.erase(0, str.find(',') + 1);
+				while (str.size() != 0)
+				{
+					if (str.find(',') != str.npos) {
+						currNumber = str.substr(0, str.find(','));
+						str.erase(0, str.find(',')+1);
+						numbers.push_back(stoi(currNumber));
+					}
+					else {
+						str.clear();
+					}
+				}
+				pair.first = country;
+				pair.second = numbers;
+				countries.push_back(pair);
+			}
+			else {
+				numberOfCountries = numberOfCountries + stoi(str);
 			}
 		}
+		currFile.close();
 	}
 	return countries;
 }
