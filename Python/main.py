@@ -80,7 +80,7 @@ def write_to_file(path, res):
     :param res: TOP-10 rating
     :return: void
     """
-    with open(path + "\\result.csv", "w", newline='') as f:
+    with open(path + "\\result_py.csv", "w", newline='') as f:
         for row in res:
             csv.writer(f).writerow(row)
     print("READY!")

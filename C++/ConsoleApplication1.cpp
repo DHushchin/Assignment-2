@@ -7,12 +7,14 @@
 
 using namespace std;
 
-vector<string> get_files(string&);
-vector<pair<string, vector<int>>> get_data(vector<string>, int&);
-vector<pair<string, int>> get_results(vector<string>, int&);
-int count(vector<pair<string, vector<int>>> data, size_t curr);
-void output(vector<pair<string, int>>, string);
-vector<pair<string, int>> sort(vector<pair<string, int>>);
+vector<string> get_files(string&); // gets list of files from the directory
+vector<pair<string, int>> get_results(vector<string>, int&); // parses files
+vector<pair<string, vector<int>>> get_data(vector<string>, int&); // forms vector [country - votes]
+vector<pair<string, vector<int>>> sort_col(vector<pair<string, vector<int>>> data); // sorts votes in columns
+void get_points(vector<pair<string, vector<int>>>&); // converts votes into points
+int sum_points(vector<int>); // sums points in a row
+void save_res(vector<pair<string, int>>, string); // saves result to results.csv
+
 
 int main() {
 	vector<pair<string, int>> results;
@@ -21,33 +23,31 @@ int main() {
 	int numberOfCountries = 0;
 	vector<string> files = get_files(dir);
 	results = get_results(files, numberOfCountries);
-	output(results, dir);
-	system("pause>>void");
+	save_res(results, dir);
+	system("pause >> void");
 	return 0;
 }
 
-vector<string> get_files(string &directory) {
+vector<string> get_files(string &dir) {
 	vector<string> files;
 	_finddata_t source;
-	string dir;
 	cout << "Enter the directory: "; cin >> dir;
 	if (dir[dir.size() - 1] != '\\') dir += '\\';
 	intptr_t handle = _findfirst((dir + "*.csv").c_str(), &source);
-	cout << "Starting these files: " << endl;
+	cout << "List of files: " << endl;
 	cout << "========================" << endl;
 	do {
 		string name = source.name;
-		if (name != "results.csv") {
+		if (name.find("result") == string::npos) { // ignore result.csv files
 			files.push_back(dir + source.name);
 			cout << dir + source.name << endl;
 		}
 	} while (_findnext(handle, &source) == 0);
-	directory = dir;
 	_findclose(handle);
 	return files;
 }
 
-// создаёт вектор из пар, где 1 - страна, 2 - голоса за неё
+
 vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCountries){
 	vector<pair<string, vector<int>>> countries;
 	for (size_t i = 0; i < files.size(); i++)
@@ -88,52 +88,26 @@ vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCo
 	return countries;
 }
 
-// создаёт вектор с результатами поинтов, которые получила страна
+
 vector<pair<string, int>> get_results(vector<string> files, int& numberOfCountries) {
 	vector<pair<string, int>> results;
-	vector<pair<string, vector<int>>> data = get_data(files, numberOfCountries);
+	vector<pair<string, vector<int>>> data;
+	data = get_data(files, numberOfCountries);
+	get_points(data);
 	pair<string, int> pair;
 	for (size_t i = 0; i < data.size(); i++)
 	{
 		pair.first = data[i].first;
-		pair.second = count(data, i);
+		pair.second = sum_points(data[i].second);
 		results.push_back(pair);
+		cout << results[i].first << '\t' << results[i].second << endl;
 	}
 	return results;
 }
 
-// считает поинты, которые получила страна
-int count(vector<pair<string, vector<int>>> data, size_t curr) {
-	int points = 0;
-	for (size_t columns = 0; columns < data[0].second.size(); columns++)
-	{
-		int bigger = 0;
-		for (size_t rows = 0; rows < data.size(); rows++)
-		{
-			if (rows == curr) {
-				continue;
-			}
-			if (data[curr].second[columns] < data[rows].second[columns]) {
-				bigger++;
-			}
-		}
-		if (bigger == 0) {
-			points += points + 12;
-		}
-		else if (bigger == 1) {
-			points += points + 10;
-		}
-		else if (bigger <= 9) {
-			points += 10 - bigger;
-		}
-	}
-	return points;
-}
 
-// выводит в results.csv
-void output(vector<pair<string, int>> results, string dir) {
-	ofstream output(dir + "results.csv");
-	results = sort(results);
+void save_res(vector<pair<string, int>> results, string dir) {
+	ofstream output(dir + "results_cpp.csv");
 	for (size_t i = 0; i < 10; i++)
 	{
 		output << results[i].first << ", " << results[i].second << endl;
@@ -143,17 +117,44 @@ void output(vector<pair<string, int>> results, string dir) {
 	output.close();
 }
 
-// сортирует, чтобы топ-10 был в правильном порядке
-vector<pair<string, int>> sort(vector<pair<string, int>> results) {
-	pair<string, int> temp;
-	for (int i = 0; i < results.size() - 1; i++) {
-		for (int j = 0; j < results.size() - i - 1; j++) {
-			if (results[j].second < results[j + 1].second) {
-				temp = results[j];
-				results[j] = results[j + 1];
-				results[j + 1] = temp;
+
+int sum_points(vector<int> votes) {
+	int points = 0;
+	for (size_t i = 0; i < votes.size(); i++) points += votes[i];
+	return points;
+}
+
+
+void get_points(vector<pair<string, vector<int>>>& data) {
+	vector<pair<string, vector<int>>> sorted_data = sort_col(data);
+	for (int col = 0; col < data[0].second.size(); col++) {
+		for (int row = 0; row < data.size(); row++) {
+			for (int i = 0; i < 10; i++) {
+				if (data[row].second[col] == sorted_data[i].second[col] && i == 0) { data[row].second[col] = 12; }
+				else if (data[row].second[col] == sorted_data[i].second[col] && i == 1) { data[row].second[col] = 10; }
+				else if (data[row].second[col] == sorted_data[i].second[col] && i > 1 && i < 10) { data[row].second[col] = 10 - i; }
+				else data[row].second[col] = 0;
 			}
 		}
 	}
-	return results;
 }
+
+
+vector<pair<string, vector<int>>> sort_col(vector<pair<string, vector<int>>> data) {
+	for (int col = 0; col < data[0].second.size(); col++) {
+		for (int row = 0; row < data.size() - 1; row++) {
+			if (data[row].second[col] > data[row + 1].second[col]) {
+				swap(data[row].first, data[row + 1].first);
+				swap(data[row].second[col], data[row + 1].second[col]);
+			}
+			cout << data[row].first << '\t' << data[row].second[col] << endl;
+		}
+		cout << endl;
+	}
+	return data;
+}
+
+
+
+
+
