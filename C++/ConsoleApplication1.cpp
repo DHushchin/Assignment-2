@@ -8,7 +8,7 @@
 using namespace std;
 
 vector<string> get_files(string&);
-vector<pair<string, vector<int>>> get_data(vector<string>, int&, size_t);
+vector<pair<string, vector<int>>> get_data(vector<string>, int&);
 vector<pair<string, int>> get_results(vector<string>, int&);
 int count(vector<pair<string, vector<int>>> data, size_t curr);
 void output(vector<pair<string, int>>, string);
@@ -48,56 +48,56 @@ vector<string> get_files(string &directory) {
 }
 
 // создаёт вектор из пар, где 1 - страна, 2 - голоса за неё
-vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCountries, size_t number){
+vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCountries){
 	vector<pair<string, vector<int>>> countries;
-	string str;
-	string currNumber;
-	pair<string, vector<int>> pair;
-	ifstream currFile(files[number]);
-	while (!currFile.eof()) {
-		getline(currFile, str);
-		vector<int> numbers;
-		string country;
-		if (!isdigit(str[0])) {
-			country = str.substr(0, str.find(','));
-			str.erase(0, str.find(',') + 1);
-			while (str.size() != 0)
-			{
-				if (str.find(',') != str.npos) {
-					currNumber = str.substr(0, str.find(','));
-					str.erase(0, str.find(',')+1);
-					numbers.push_back(stoi(currNumber));
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		string str;
+		string currNumber;
+		pair<string, vector<int>> pair;
+		ifstream currFile(files[i]);
+		while (!currFile.eof()) {
+			getline(currFile, str);
+			vector<int> numbers;
+			string country;
+			if (!isdigit(str[0])) {
+				country = str.substr(0, str.find(','));
+				str.erase(0, str.find(',') + 1);
+				while (str.size() != 0)
+				{
+					if (str.find(',') != str.npos) {
+						currNumber = str.substr(0, str.find(','));
+						str.erase(0, str.find(',') + 1);
+						numbers.push_back(stoi(currNumber));
+					}
+					else {
+						currNumber = str.substr(0, str.length());
+						str.clear();
+					}
 				}
-				else {
-					currNumber = str.substr(0, str.length());
-					str.clear();
-				}
+				pair.first = country;
+				pair.second = numbers;
+				countries.push_back(pair);
 			}
-			pair.first = country;
-			pair.second = numbers;
-			countries.push_back(pair);
+			else {
+				numberOfCountries = numberOfCountries + stoi(str);
+			}
 		}
-		else {
-			numberOfCountries = numberOfCountries + stoi(str);
-		}
+		currFile.close();
 	}
-	currFile.close();
 	return countries;
 }
 
 // создаёт вектор с результатами поинтов, которые получила страна
 vector<pair<string, int>> get_results(vector<string> files, int& numberOfCountries) {
 	vector<pair<string, int>> results;
-	for (size_t numberOfFile = 0; numberOfFile < files.size(); numberOfFile++)
+	vector<pair<string, vector<int>>> data = get_data(files, numberOfCountries);
+	pair<string, int> pair;
+	for (size_t i = 0; i < data.size(); i++)
 	{
-		vector<pair<string, vector<int>>> data = get_data(files, numberOfCountries, numberOfFile);
-		pair<string, int> pair;
-		for (size_t i = 0; i < data.size(); i++)
-		{
-			pair.first = data[i].first;
-			pair.second = count(data, i);
-			results.push_back(pair);
-		}
+		pair.first = data[i].first;
+		pair.second = count(data, i);
+		results.push_back(pair);
 	}
 	return results;
 }
@@ -123,7 +123,7 @@ int count(vector<pair<string, vector<int>>> data, size_t curr) {
 		else if (bigger == 1) {
 			points += points + 10;
 		}
-		else {
+		else if (bigger <= 9) {
 			points += 10 - bigger;
 		}
 	}
