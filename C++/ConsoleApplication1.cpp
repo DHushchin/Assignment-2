@@ -140,6 +140,7 @@ void output(vector<pair<string, int>> results, string dir) {
 	}
 	cout << "========================" << endl;
 	cout << "Results.csv was saved in " + dir;
+	output.close();
 }
 
 // сортирует, чтобы топ-10 был в правильном порядке
