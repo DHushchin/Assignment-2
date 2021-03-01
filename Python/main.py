@@ -24,7 +24,7 @@ def parse_files(path):
     :param path: path to directory
     :return: matrix[country - votes]
     """
-    files = [file for file in listdir(path) if isfile(join(path, file)) and '.csv' in file and file != 'result.csv']
+    files = [file for file in listdir(path) if isfile(join(path, file)) and '.csv' in file and 'result' not in file]
     lst = []
     for file in files:
         file_path = path + '\\' + file
