@@ -26,7 +26,7 @@ int main() {
 	return 0;
 }
 
-vector<string> get_files(string &directory) {
+vector<string> get_files(string& directory) {
 	vector<string> files;
 	_finddata_t source;
 	string dir;
@@ -48,7 +48,7 @@ vector<string> get_files(string &directory) {
 }
 
 // создаёт вектор из пар, где 1 - страна, 2 - голоса за неё
-vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCountries){
+vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCountries) {
 	vector<pair<string, vector<int>>> countries;
 	for (size_t i = 0; i < files.size(); i++)
 	{
@@ -73,6 +73,7 @@ vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCo
 					else {
 						currNumber = str.substr(0, str.length());
 						str.clear();
+						numbers.push_back(stoi(currNumber));
 					}
 				}
 				pair.first = country;
@@ -118,13 +119,13 @@ int count(vector<pair<string, vector<int>>> data, size_t curr) {
 			}
 		}
 		if (bigger == 0) {
-			points += points + 12;
+			points = points + 12;
 		}
 		else if (bigger == 1) {
-			points += points + 10;
+			points = points + 10;
 		}
 		else if (bigger <= 9) {
-			points += 10 - bigger;
+			points = points + (10 - bigger);
 		}
 	}
 	return points;
@@ -146,8 +147,8 @@ void output(vector<pair<string, int>> results, string dir) {
 // сортирует, чтобы топ-10 был в правильном порядке
 vector<pair<string, int>> sort(vector<pair<string, int>> results) {
 	pair<string, int> temp;
-	for (int i = 0; i < results.size() - 1; i++) {
-		for (int j = 0; j < results.size() - i - 1; j++) {
+	for (size_t i = 0; i < results.size() - 1; i++) {
+		for (size_t j = 0; j < results.size() - i - 1; j++) {
 			if (results[j].second < results[j + 1].second) {
 				temp = results[j];
 				results[j] = results[j + 1];
