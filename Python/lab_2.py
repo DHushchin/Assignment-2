@@ -24,7 +24,7 @@ def parse_files(path):
     :param path: path to directory
     :return: matrix[country - votes]
     """
-    files = [file for file in listdir(path) if isfile(join(path, file)) and '.csv' in file and file != 'result.csv']
+    files = [file for file in listdir(path) if isfile(join(path, file)) and '.csv' in file and 'result' not in file]
     lst = []
     for file in files:
         file_path = path + '\\' + file
@@ -80,7 +80,7 @@ def write_to_file(path, res):
     :param res: TOP-10 rating
     :return: void
     """
-    with open(path + "\\result.csv", "w", newline='') as f:
+    with open(path + "\\result_py.csv", "w", newline='') as f:
         for row in res:
             csv.writer(f).writerow(row)
     print("READY!")
