@@ -1,13 +1,13 @@
 #include "Parsing.h"
 
+
 vector<string> get_files(string& directory) {
 	vector<string> files;
 	_finddata_t source;
-	string dir;
 	cout << "Enter the directory: "; cin >> dir;
 	if (dir[dir.size() - 1] != '\\') dir += '\\';
 	intptr_t handle = _findfirst((dir + "*.csv").c_str(), &source);
-	cout << "Starting these files: " << endl;
+	cout << "List of files: " << endl;
 	cout << "========================" << endl;
 	do {
 		string name = source.name;
@@ -16,7 +16,6 @@ vector<string> get_files(string& directory) {
 			cout << dir + source.name << endl;
 		}
 	} while (_findnext(handle, &source) == 0);
-	directory = dir;
 	_findclose(handle);
 	return files;
 }
@@ -67,13 +66,16 @@ vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCo
 vector<pair<string, int>> get_results(vector<string> files) {
 	int numberOfCountries = 0;
 	vector<pair<string, int>> results;
-	vector<pair<string, vector<int>>> data = get_data(files, numberOfCountries);
+	vector<pair<string, vector<int>>> data;
+	data = get_data(files, numberOfCountries);
+	get_points(data);
 	pair<string, int> pair;
 	for (size_t i = 0; i < data.size(); i++)
 	{
 		pair.first = data[i].first;
-		pair.second = count(data, i);
+		pair.second = sum_points(data[i].second);
 		results.push_back(pair);
+		cout << results[i].first << '\t' << results[i].second << endl;
 	}
 	return results;
 }
@@ -133,3 +135,4 @@ vector<pair<string, int>> sort(vector<pair<string, int>> results) {
 	}
 	return results;
 }
+
