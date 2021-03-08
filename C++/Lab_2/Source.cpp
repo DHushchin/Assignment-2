@@ -35,8 +35,15 @@ vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCo
 			vector<int> numbers;
 			string country;
 			if (!isdigit(str[0])) {
-				country = str.substr(0, str.find(','));
-				str.erase(0, str.find(',') + 1);
+				if (str[0] == '\"') {
+					str.erase(0, 1);
+					country = str.substr(0, str.find('\"'));
+					str.erase(0, str.find('\"') + 2);
+				}
+				else {
+					country = str.substr(0, str.find(','));
+					str.erase(0, str.find(',') + 1);
+				}
 				while (str.size() != 0)
 				{
 					if (str.find(',') != str.npos) {
