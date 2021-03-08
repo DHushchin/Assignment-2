@@ -1,26 +1,27 @@
-#include "Parsing.h"
-
+#include "Header.h"
 
 vector<string> get_files(string& directory) {
 	vector<string> files;
 	_finddata_t source;
+	string dir;
 	cout << "Enter the directory: "; cin >> dir;
 	if (dir[dir.size() - 1] != '\\') dir += '\\';
 	intptr_t handle = _findfirst((dir + "*.csv").c_str(), &source);
-	cout << "List of files: " << endl;
+	cout << "Starting these files: " << endl;
 	cout << "========================" << endl;
 	do {
 		string name = source.name;
-		if (name.find("result") == string::npos) { // ignore result.csv files
+		if (name != "results.csv") {
 			files.push_back(dir + source.name);
 			cout << dir + source.name << endl;
 		}
 	} while (_findnext(handle, &source) == 0);
+	directory = dir;
 	_findclose(handle);
 	return files;
 }
 
-
+// создаёт вектор из пар, где 1 - страна, 2 - голоса за неё
 vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCountries) {
 	vector<pair<string, vector<int>>> countries;
 	for (size_t i = 0; i < files.size(); i++)
@@ -62,25 +63,21 @@ vector<pair<string, vector<int>>> get_data(vector<string> files, int& numberOfCo
 	return countries;
 }
 
-
-vector<pair<string, int>> get_results(vector<string> files) {
-	int numberOfCountries = 0;
+// создаёт вектор с результатами поинтов, которые получила страна
+vector<pair<string, int>> get_results(vector<string> files, int& numberOfCountries) {
 	vector<pair<string, int>> results;
-	vector<pair<string, vector<int>>> data;
-	data = get_data(files, numberOfCountries);
-	get_points(data);
+	vector<pair<string, vector<int>>> data = get_data(files, numberOfCountries);
 	pair<string, int> pair;
 	for (size_t i = 0; i < data.size(); i++)
 	{
 		pair.first = data[i].first;
-		pair.second = sum_points(data[i].second);
+		pair.second = count(data, i);
 		results.push_back(pair);
-		cout << results[i].first << '\t' << results[i].second << endl;
 	}
 	return results;
 }
 
-
+// считает поинты, которые получила страна
 int count(vector<pair<string, vector<int>>> data, size_t curr) {
 	int points = 0;
 	for (size_t columns = 0; columns < data[0].second.size(); columns++)
@@ -108,9 +105,9 @@ int count(vector<pair<string, vector<int>>> data, size_t curr) {
 	return points;
 }
 
-
+// выводит в results.csv
 void output(vector<pair<string, int>> results, string dir) {
-	ofstream output(dir + "results_cpp.csv");
+	ofstream output(dir + "results.csv");
 	results = sort(results);
 	for (size_t i = 0; i < 10; i++)
 	{
@@ -121,7 +118,7 @@ void output(vector<pair<string, int>> results, string dir) {
 	output.close();
 }
 
-
+// сортирует, чтобы топ-10 был в правильном порядке
 vector<pair<string, int>> sort(vector<pair<string, int>> results) {
 	pair<string, int> temp;
 	for (size_t i = 0; i < results.size() - 1; i++) {
@@ -135,4 +132,3 @@ vector<pair<string, int>> sort(vector<pair<string, int>> results) {
 	}
 	return results;
 }
-
